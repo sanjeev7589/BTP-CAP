@@ -1,0 +1,3 @@
+CONSTRAINT PO_CONST 
+ON "emp_table" FOREIGN KEY ("comp_table_id") 
+REFERENCES "comp_table" ("Comp_ID") ON DELETE CASCADE 

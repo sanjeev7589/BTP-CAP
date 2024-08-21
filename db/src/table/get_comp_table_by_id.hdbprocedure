@@ -1,0 +1,12 @@
+PROCEDURE "GET_COMP_TABLE_ALL_DATA" ()
+LANGUAGE SQLSCRIPT
+ AS
+BEGIN
+SELECT
+"Comp_ID",
+"Comp_Name",
+"Comp_dept"
+
+FROM
+"comp_table";
+END;

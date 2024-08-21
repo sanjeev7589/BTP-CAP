@@ -1,0 +1,11 @@
+PROCEDURE "GET_EMP_TABLE_ALL_DATA" ()
+LANGUAGE SQLSCRIPT
+AS
+BEGIN
+    SELECT
+        "first_name",
+        "last_name",
+        "job_title"
+    FROM
+        "emp_table";
+END;

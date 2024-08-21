@@ -1,0 +1,56 @@
+PROCEDURE "ADD_EDIT_comp_table"(
+IN "IN_PARAM" NCLOB, 
+OUT EX_MESSAGE nvarchar(200)
+) AS
+BEGIN
+    DECLARE  ID BIGINT := 0; 
+
+DECLARE comp_emp_id BIGINT;
+DECLARE comp_first_name VARCHAR(50);
+DECLARE comp_last_name VARCHAR(50);
+DECLARE comp_job_titlee VARCHAR(50);
+DECLARE comp_parent_id  BIGINT;
+DECLARE comp_comp_table_id  BIGINT;
+DECLARE comp_parent_Comp_Name VARCHAR(100);
+DECLARE comp_parent_Comp_dept VARCHAR(100);
+
+--declaring emty_name for storing msg text
+    DECLARE empty_name CONDITION FOR SQL_ERROR_CODE 10001;
+        DECLARE EXIT HANDLER FOR empty_name
+            BEGIN
+                EX_MESSAGE := ' ' || ::SQL_ERROR_MESSAGE;
+                DROP TABLE #temp_compemp;
+            END;
+
+  -- to create a local temp table to store temp parent id 
+  CREATE LOCAL TEMPORARY COLUMN TABLE #temp_compemp (
+    "Comp_ID" BIGINT,
+    "temp_id"  BIGINT,
+    "temp_parent_id"  BIGINT
+);
+
+
+SELECT IFNULL(JSON_VALUE(:IN_PARAM, '$.Comp_ID'),0) INTO "ID" FROM DUMMY;
+    IF :ID > 0 THEN
+
+        UPDATE "comp_table" SET
+        "Comp_Name" = JSON_VALUE(:IN_PARAM, '$.Comp_Name'),
+        "Comp_dept" = JSON_VALUE(:IN_PARAM, '$.Comp_dept')
+
+        WHERE "Comp_ID" = :ID;
+
+        
+    ELSE
+        IF EXISTS (SELECT 1 FROM "comp_table" WHERE "Comp_Name" = JSON_VALUE(:IN_PARAM, '$.Comp_Name')) THEN
+            SIGNAL empty_name SET MESSAGE_TEXT = 'Record with the same name already exists';
+        ELSE
+          INSERT INTO "comp_table"  ("Comp_Name","Comp_dept")
+          VALUES(
+            JSON_VALUE(:IN_PARAM, '$.Comp_Name'),
+            JSON_VALUE(:IN_PARAM, '$.Comp_dept')
+          );
+          select current_identity_value() into ID from dummy;
+
+        END IF;
+    END IF;
+END
